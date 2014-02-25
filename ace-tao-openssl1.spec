@@ -3,7 +3,8 @@
 %define TAOVER  1.8.1
 %define CIAOVER 0.8.1
 
-%define _libdir /opt/suse/%{_lib}
+%define _suselibdir /opt/suse/%{_lib}
+%define _name_postfix -openssl1
 
 # Conditional build
 # Default values are
@@ -56,7 +57,7 @@
 %endif
 
 Summary:      The ADAPTIVE Communication Environment (ACE) and The ACE ORB (TAO)
-Name:         ace-tao
+Name:         ace-tao%{_name_postfix}
 Version:      %{ACEVER}
 
 %if 0%{?opensuse_bs}
@@ -112,19 +113,19 @@ BuildRequires:  perl
 
 %if %{?_with_fltk:1}%{!?_with_fltk:0}
 BuildRequires:  fltk-devel
-%define fltk_pac ace-flreactor
+%define fltk_pac ace-flreactor%{_name_postfix}
 %endif
 
 %if %{?_with_tk:1}%{!?_with_tk:0}
 BuildRequires:  tcl-devel
 BuildRequires:  tk-devel
 BuildRequires:  tk
-%define tk_pac ace-tkreactor
+%define tk_pac ace-tkreactor%{_name_postfix}
 %define tao_tk_pac tao-tkresource
 %endif
 
 %if %{?_with_qt:1}%{!?_with_qt:0}
-%define qt_pack ace-qtreactor
+%define qt_pack ace-qtreactor%{_name_postfix}
 %define tao_qt_pac tao-qtresource
 
 # qt3 has a name change in F9
@@ -145,7 +146,7 @@ BuildRequires:  %{qtpacname}-devel
 %if 0%{?suse_version} == 1020
 BuildRequires: fox16-devel
 %endif
-%define fox_pac ace_foxreactor
+%define fox_pac ace_foxreactor%{_name_postfix}
 %endif
 
 %if %{?_with_xt:1}%{!?_with_xt:0}
@@ -154,7 +155,7 @@ BuildRequires: fox16-devel
 # new -> BuildRequires: libX11-devel
 # BuildRequires: %{_libdir}/libX11.so
 # BuildRequires: %{_libdir}/libXt.so
-%define xt_pac ace-xtreactor
+%define xt_pac ace-xtreactor%{_name_postfix}
 %define tao_xt_pac tao-xtresource
 %endif
 
@@ -163,7 +164,7 @@ BuildRequires: fox16-devel
 %endif
 
 %if 0%{?suse_version}
-%define ace_packages ace ace-xml ace-gperf ace-kokyu
+%define ace_packages ace%{_name_postfix} ace-xml%{_name_postfix} ace-gperf%{_name_postfix} ace-kokyu%{_name_postfix}
 %define tao_packages tao tao-utils tao tao-cosnaming tao-cosevent tao-cosnotification tao-costrading tao-rtevent tao-cosconcurrency
 %define all_ace_packages %{?ace_packages} %{?fltk_pac} %{?tk_pac} %{?qt_pac} %{?fox_pac} %{?xt_pac}
 %define all_tao_packages %{?tao_packages} %{?tao_fl_pac} %{?tao_qt_pac} %{?tao_xt_pac} %{?tao_tk_pac}
@@ -175,7 +176,7 @@ BuildRequires: fox16-devel
 NoSource: 0
 %endif
 
-%description -n ace-tao
+%description -n ace-tao%{_name_postfix}
 
 The ADAPTIVE Communication Environment (ACE) is a freely available,
 open-source object-oriented (OO) framework that implements many core
@@ -197,13 +198,13 @@ conventional ORBs for high-performance and real-time applications.
 
 # ---------------- ace ----------------
 
-%package -n     ace
+%package -n     ace%{_name_postfix}
 Summary:        The ADAPTIVE Communication Environment (ACE)
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
 Requires:       openssl
 
-%description -n ace
+%description -n ace%{_name_postfix}
 
 The ADAPTIVE Communication Environment (ACE) is a freely available,
 open-source object-oriented (OO) framework that implements many core
@@ -218,30 +219,31 @@ services, concurrent execution and synchronization.
 
 # ---------------- ace-devel ----------------
 
-%package -n     ace-devel
+%package -n     ace%{_name_postfix}-devel
 Summary:        Header files and development components for ACE
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace = %{ACEVER}
+Requires:       ace%{_name_postfix} = %{ACEVER}
 Requires:       openssl-devel
 %if !0%{?suse_version}
 Provides:       perl(PerlACE::Run_Test) perl(Process) perl(VmsProcess) perl(Win32::Process)
 %endif
+Conflicts:      ace-devel
 
-%description -n ace-devel
+%description -n ace%{_name_postfix}-devel
 
 This package contains the components needed for developing programs
 using ACE.
 
 # ---------------- ace-xml ----------------
 
-%package -n     ace-xml
+%package -n     ace-xml%{_name_postfix}
 Summary:        ACE XML Runtime Support
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace = %{ACEVER}
+Requires:       ace%{_name_postfix} = %{ACEVER}
 
-%description -n ace-xml
+%description -n ace-xml%{_name_postfix}
 
 ACE XML Parser interfaces follows the the design of SAX 2.0, which is
 a public domain specification for Java.  The major difference between
@@ -252,39 +254,40 @@ don't support C++ exceptions.  SAX is defined by David Megginson
 
 # ---------------- ace-gperf ----------------
 
-%package -n     ace-gperf
+%package -n     ace-gperf%{_name_postfix}
 Summary:        ACE gperf
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace = %{ACEVER}
+Requires:       ace%{_name_postfix} = %{ACEVER}
 
-%description -n ace-gperf
+%description -n ace-gperf%{_name_postfix}
 
 ACE gperf utility
 
 # ---------------- ace-xml-devel ----------------
 
-%package -n     ace-xml-devel
+%package -n     ace-xml%{_name_postfix}-devel
 Summary:        Header files and development components for ACE XML
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-devel = %{ACEVER}
-Requires:       ace-xml = %{ACEVER}
+Requires:       ace%{_name_postfix}-devel = %{ACEVER}
+Requires:       ace-xml%{_name_postfix} = %{ACEVER}
+Conflicts:      ace-xml-devel
 
-%description -n ace-xml-devel
+%description -n ace-xml%{_name_postfix}-devel
 
 This package contains the components needed for developing programs
 using ACEXML.
 
-# ---------------- ace-kokyu ----------------
+# ---------------- ace-kokyu%{_name_postfix} ----------------
 
-%package -n     ace-kokyu
+%package -n     ace-kokyu%{_name_postfix}
 Summary:        Kokyu scheduling framework for ACE
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace = %{ACEVER}
+Requires:       ace%{_name_postfix} = %{ACEVER}
 
-%description -n ace-kokyu
+%description -n ace-kokyu%{_name_postfix}
 
 Kokyu is a portable middleware scheduling framework designed to
 provide flexible scheduling and dispatching services within the
@@ -297,14 +300,15 @@ implementations.
 
 # ---------------- ace-kokyu-devel ----------------
 
-%package -n     ace-kokyu-devel
+%package -n     ace-kokyu%{_name_postfix}-devel
 Summary:        Header files and development components for the ACE Kokyu scheduler
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-devel = %{ACEVER}
-Requires:       ace-kokyu = %{ACEVER}
+Requires:       ace%{_name_postfix}-devel = %{ACEVER}
+Requires:       ace-kokyu%{_name_postfix} = %{ACEVER}
+Conflicts:      ace-kokyu-devel
 
-%description -n ace-kokyu-devel
+%description -n ace-kokyu%{_name_postfix}-devel
 
 This package contains the components needed for developing programs
 using Kokyu.
@@ -314,14 +318,14 @@ using Kokyu.
 
 %if %{?_with_fox:1}%{!?_with_fox:0}
 %if 0%{?have_fox} == 1
-%package -n     ace-foxreactor
+%package -n     ace-foxreactor%{_name_postfix}
 Summary:        ACE_FoxReactor for use with the FOX toolkit
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace = %{ACEVER}
+Requires:       ace%{_name_postfix} = %{ACEVER}
 Requires:       fox16
 
-%description -n ace-foxreactor
+%description -n ace-foxreactor%{_name_postfix}
 
 A Reactor implementation that uses the FOX toolkit for
 event demultiplexing.  This will let us integrate the FOX toolkit with
@@ -333,15 +337,16 @@ ACE and/or TAO.
 
 %if %{?_with_fox:1}%{!?_with_fox:0}
 %if 0%{?have_fox} == 1
-%package -n     ace-foxreactor-devel
+%package -n     ace-foxreactor%{_name_postfix}-devel
 Summary:        Header files for development with ACE_FoxReactor
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-devel = %{ACEVER}
-Requires:       ace-foxreactor = %{ACEVER}
+Requires:       ace%{_name_postfix}-devel = %{ACEVER}
+Requires:       ace-foxreactor%{_name_postfix} = %{ACEVER}
 Requires:       fox16-devel
+Conflicts:      ace-foxreactor-devel
 
-%description -n ace-foxreactor-devel
+%description -n ace-foxreactor%{_name_postfix}-devel
 
 This package contains the components needed for developing programs
 using the ACE_FoxReactor.
@@ -351,14 +356,14 @@ using the ACE_FoxReactor.
 # ---------------- ace-flreactor ----------------
 
 %if %{?_with_fl:1}%{!?_with_fl:0}
-%package -n     ace-flreactor
+%package -n     ace-flreactor%{_name_postfix}
 Summary:        ACE_FlReactor for use with the Fast-Light toolkit
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace = %{ACEVER}
+Requires:       ace%{_name_postfix} = %{ACEVER}
 Requires:       fltk
 
-%description -n ace-flreactor
+%description -n ace-flreactor%{_name_postfix}
 
 A Reactor implementation that uses the Fast-Light (FL) toolkit for
 event demultiplexing.  This will let us integrate the FL toolkit with
@@ -368,15 +373,16 @@ ACE and/or TAO.
 # ---------------- ace-flreactor-devel ----------------
 
 %if %{?_with_fl:1}%{!?_with_fl:0}
-%package -n     ace-flreactor-devel
+%package -n     ace-flreactor%{_name_postfix}-devel
 Summary:        Header files for development with ACE_FlReactor
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-devel = %{ACEVER}
-Requires:       ace-flreactor = %{ACEVER}
+Requires:       ace%{_name_postfix}-devel = %{ACEVER}
+Requires:       ace-flreactor%{_name_postfix} = %{ACEVER}
 Requires:       fltk-devel
+Conflicts:      ace-flreactor-devel
 
-%description -n ace-flreactor-devel
+%description -n ace-flreactor%{_name_postfix}-devel
 
 This package contains the components needed for developing programs
 using the ACE_FlReactor.
@@ -385,14 +391,14 @@ using the ACE_FlReactor.
 # ---------------- ace-qtreactor ----------------
 
 %if %{?_with_qt:1}%{!?_with_qt:0}
-%package -n     ace-qtreactor
+%package -n     ace-qtreactor%{_name_postfix}
 Summary:        ACE_QtReactor for use with Qt library
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace = %{ACEVER}
+Requires:       ace%{_name_postfix} = %{ACEVER}
 Requires:       qt
 
-%description -n ace-qtreactor
+%description -n ace-qtreactor%{_name_postfix}
 
 A Reactor implementation that uses the Qt toolkit for event
 demultiplexing.  This will let us integrate the Qt toolkit with ACE
@@ -402,15 +408,16 @@ and/or TAO.
 # ---------------- ace-qtreactor-devel ----------------
 
 %if %{?_with_qt:1}%{!?_with_qt:0}
-%package -n     ace-qtreactor-devel
+%package -n     ace-qtreactor%{_name_postfix}-devel
 Summary:        Header files for development with ACE_QtReactor
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-devel = %{ACEVER}
-Requires:       ace-qtreactor = %{ACEVER}
+Requires:       ace%{_name_postfix}-devel = %{ACEVER}
+Requires:       ace-qtreactor%{_name_postfix} = %{ACEVER}
 Requires:       qt-devel
+Conflicts:      ace-qtreactor-devel
 
-%description -n ace-qtreactor-devel
+%description -n ace-qtreactor%{_name_postfix}-devel
 
 This package contains the components needed for developing programs
 using the ACE_QtReactor.
@@ -419,14 +426,14 @@ using the ACE_QtReactor.
 # ---------------- ace-tkreactor ----------------
 
 %if %{?_with_tk:1}%{!?_with_tk:0}
-%package -n     ace-tkreactor
+%package -n     ace-tkreactor%{_name_postfix}
 Summary:        ACE_TkReactor for use with Tk toolkit
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace = %{ACEVER}
+Requires:       ace%{_name_postfix} = %{ACEVER}
 Requires:       tk
 
-%description -n ace-tkreactor
+%description -n ace-tkreactor%{_name_postfix}
 
 A Reactor implementation that uses the Tk toolkit for event
 demultiplexing.  This will let us integrate the Tk toolkit with ACE
@@ -436,15 +443,16 @@ and/or TAO.
 # ---------------- ace-tkreactor-devel ----------------
 
 %if %{?_with_tk:1}%{!?_with_tk:0}
-%package -n     ace-tkreactor-devel
+%package -n     ace-tkreactor%{_name_postfix}-devel
 Summary:        Header files for development with ACE_TkReactor
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-devel = %{ACEVER}
-Requires:       ace-tkreactor = %{ACEVER}
+Requires:       ace%{_name_postfix}-devel = %{ACEVER}
+Requires:       ace-tkreactor%{_name_postfix} = %{ACEVER}
 Requires:       tk-devel
+Conflicts:      ace-tkreactor-devel
 
-%description -n ace-tkreactor-devel
+%description -n ace-tkreactor%{_name_postfix}-devel
 
 This package contains the components needed for developing programs
 using the ACE_TkReactor.
@@ -453,15 +461,15 @@ using the ACE_TkReactor.
 # ---------------- ace-xtreactor ----------------
 
 %if %{?_with_xt:1}%{!?_with_xt:0}
-%package -n     ace-xtreactor
+%package -n     ace-xtreactor%{_name_postfix}
 Summary:        ACE_XtReactor for use with the X Toolkit
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace = %{ACEVER}
+Requires:       ace%{_name_postfix} = %{ACEVER}
 # The xorg packaging scheme changed, let autoreq to the job for now.
 # Requires: xorg-x11-libs
 
-%description -n ace-xtreactor
+%description -n ace-xtreactor%{_name_postfix}
 
 A Reactor implementation that uses the X Toolkit for event
 demultiplexing.  This will let us integrate the X Toolkit with ACE
@@ -471,19 +479,20 @@ and/or TAO.
 # ---------------- ace-xtreactor-devel ----------------
 
 %if %{?_with_xt:1}%{!?_with_xt:0}
-%package -n     ace-xtreactor-devel
+%package -n     ace-xtreactor%{_name_postfix}-devel
 Summary:        Header files for development with ACE_XtReactor
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-devel = %{ACEVER}
-Requires:       ace-xtreactor = %{ACEVER}
+Requires:       ace%{_name_postfix}-devel = %{ACEVER}
+Requires:       ace-xtreactor%{_name_postfix} = %{ACEVER}
 # The xorg package naming scheme changed, use specific files for now.
 # old -> Requires: xorg-x11-devel
 # new -> Requires: libX11-devel
 Requires: %{_libdir}/libX11.so
 Requires: %{_libdir}/libXt.so
+Conflicts:      ace-xtreactor-devel
 
-%description -n ace-xtreactor-devel
+%description -n ace-xtreactor%{_name_postfix}-devel
 
 This package contains the components needed for developing programs
 using the ACE_XtReactor.
@@ -517,7 +526,7 @@ include Make, NMake, Visual C++ 6, Visual C++ 7, etc.
 Summary:        The ACE ORB (TAO)
 Version:        %{TAOVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace = %{ACEVER}
+Requires:       ace%{_name_postfix} = %{ACEVER}
 
 %description -n tao
 
@@ -535,8 +544,8 @@ Summary:        Header files and development components for TAO
 Version:        %{TAOVER}
 Group:          Development/Libraries/C and C++
 Requires:       tao = %{TAOVER}
-Requires:       ace-devel = %{ACEVER}
-Requires:       ace-gperf = %{ACEVER}
+Requires:       ace%{_name_postfix}-devel = %{ACEVER}
+Requires:       ace-gperf%{_name_postfix} = %{ACEVER}
 
 %description -n tao-devel
 
@@ -671,7 +680,7 @@ The CORBA Concurrency Service. One of the standard CORBA services.
 Summary:        FlResource_Factory for creating FlReactor
 Version:        %{TAOVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-flreactor = %{ACEVER}
+Requires:       ace-flreactor%{_name_postfix} = %{ACEVER}
 Requires:       tao = %{TAOVER}
 
 %description -n tao-flresource
@@ -688,7 +697,7 @@ method which is usually done by TAO_FlResource_Loader.
 Summary:        Header files for development with FlResource_Factory
 Version:        %{TAOVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-flreactor-devel = %{ACEVER}
+Requires:       ace-flreactor%{_name_postfix}-devel = %{ACEVER}
 Requires:       tao-devel = %{TAOVER}
 Requires:       tao-flresource = %{TAOVER}
 
@@ -705,7 +714,7 @@ using the FlResource_Factory.
 Summary:        QtResource_Factory for creating QtReactor
 Version:        %{TAOVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-qtreactor = %{ACEVER}
+Requires:       ace-qtreactor%{_name_postfix} = %{ACEVER}
 Requires:       tao = %{TAOVER}
 
 %description -n tao-qtresource
@@ -722,7 +731,7 @@ method which is usually done by TAO_QtResource_Loader.
 Summary:        Header files for development with QtResource_Factory
 Version:        %{TAOVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-qtreactor-devel = %{ACEVER}
+Requires:       ace-qtreactor%{_name_postfix}-devel = %{ACEVER}
 Requires:       tao-devel = %{TAOVER}
 Requires:       tao-qtresource = %{TAOVER}
 
@@ -739,7 +748,7 @@ using the QtResource_Factory.
 Summary:        TkResource_Factory for creating TkReactor
 Version:        %{TAOVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-tkreactor = %{ACEVER}
+Requires:       ace-tkreactor%{_name_postfix} = %{ACEVER}
 Requires:       tao = %{TAOVER}
 
 %description -n tao-tkresource
@@ -756,7 +765,7 @@ method which is usually done by TAO_TkResource_Loader.
 Summary:        Header files for development with TkResource_Factory
 Version:        %{TAOVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-tkreactor-devel = %{ACEVER}
+Requires:       ace-tkreactor%{_name_postfix}-devel = %{ACEVER}
 Requires:       tao-devel = %{TAOVER}
 Requires:       tao-tkresource = %{TAOVER}
 
@@ -773,7 +782,7 @@ using the TkResource_Factory.
 Summary:        XtResource_Factory for creating XtReactor
 Version:        %{TAOVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-xtreactor = %{ACEVER}
+Requires:       ace-xtreactor%{_name_postfix} = %{ACEVER}
 Requires:       tao = %{TAOVER}
 
 %description -n tao-xtresource
@@ -790,7 +799,7 @@ method which is usually done by TAO_XtResource_Loader.
 Summary:        Header files for development with XtResource_Factory
 Version:        %{TAOVER}
 Group:          Development/Libraries/C and C++
-Requires:       ace-xtreactor-devel = %{ACEVER}
+Requires:       ace-xtreactor%{_name_postfix}-devel = %{ACEVER}
 Requires:       tao-devel = %{TAOVER}
 Requires:       tao-xtresource = %{TAOVER}
 
@@ -1517,22 +1526,22 @@ exit 0
 
 # ---------------- ace ----------------
 
-%post -n ace
+%post -n ace%{_name_postfix}
 /sbin/ldconfig
 
 # ---------------- ace-devel ----------------
 
-%post -n ace-devel
+%post -n ace%{_name_postfix}-devel
 /sbin/ldconfig
 
 # ---------------- ace-xml ----------------
 
-%post -n ace-xml
+%post -n ace-xml%{_name_postfix}
 /sbin/ldconfig
 
 # ---------------- ace-gperf ----------------
 
-%post -n ace-gperf
+%post -n ace-gperf%{_name_postfix}
 /sbin/ldconfig
 
 %if 0%{?suse_version}
@@ -1543,14 +1552,14 @@ exit 0
 
 # ---------------- ace-kokyu ----------------
 
-%post -n ace-kokyu
+%post -n ace-kokyu%{_name_postfix}
 /sbin/ldconfig
 
 # ---------------- ace-foxreactor ----------------
 
 %if %{?_with_fox:1}%{!?_with_fox:0}
 %if 0%{!?suse_version} || 0%{?suse_version} == 1020
-%post -n ace-foxreactor
+%post -n ace-foxreactor%{_name_postfix}
 /sbin/ldconfig
 %endif
 %endif
@@ -1558,28 +1567,28 @@ exit 0
 # ---------------- ace-flreactor ----------------
 
 %if %{?_with_fl:1}%{!?_with_fl:0}
-%post -n ace-flreactor
+%post -n ace-flreactor%{_name_postfix}
 /sbin/ldconfig
 %endif
 
 # ---------------- ace-qtreactor ----------------
 
 %if %{?_with_qt:1}%{!?_with_qt:0}
-%post -n ace-qtreactor
+%post -n ace-qtreactor%{_name_postfix}
 /sbin/ldconfig
 %endif
 
 # ---------------- ace-tkreactor ----------------
 
 %if %{?_with_tk:1}%{!?_with_tk:0}
-%post -n ace-tkreactor
+%post -n ace-tkreactor%{_name_postfix}
 /sbin/ldconfig
 %endif
 
 # ---------------- ace-xtreactor ----------------
 
 %if %{?_with_xt:1}%{!?_with_xt:0}
-%post -n ace-xtreactor
+%post -n ace-xtreactor%{_name_postfix}
 /sbin/ldconfig
 %endif
 
@@ -1691,7 +1700,7 @@ exit 0
 
 # ---------------- ace-gperf ----------------
 
-%preun -n ace-gperf
+%preun -n ace-gperf%{_name_postfix}
 
 if [ $1 = 0 ]; then
     /sbin/install-info --delete %{_infodir}/ace_gperf.info%{_extension} %{_infodir}/dir
@@ -1780,29 +1789,29 @@ fi
 
 # ---------------- ace ----------------
 
-%postun -n ace
+%postun -n ace%{_name_postfix}
 /sbin/ldconfig
 
 # ---------------- ace-xml ----------------
 
-%postun -n ace-xml
+%postun -n ace-xml%{_name_postfix}
 /sbin/ldconfig
 
 # ---------------- ace-kokyu ----------------
 
-%postun -n ace-kokyu
+%postun -n ace-kokyu%{_name_postfix}
 /sbin/ldconfig
 
 # ---------------- ace-gperf ----------------
 
-%postun -n ace-gperf
+%postun -n ace-gperf%{_name_postfix}
 /sbin/ldconfig
 
 # ---------------- ace-foxreactor ----------------
 
 %if %{?_with_fox:1}%{!?_with_fox:0}
 %if 0%{?have_fox} == 1
-%postun -n ace-foxreactor
+%postun -n ace-foxreactor%{_name_postfix}
 /sbin/ldconfig
 %endif
 %endif
@@ -1810,28 +1819,28 @@ fi
 # ---------------- ace-flreactor ----------------
 
 %if %{?_with_fl:1}%{!?_with_fl:0}
-%postun -n ace-flreactor
+%postun -n ace-flreactor%{_name_postfix}
 /sbin/ldconfig
 %endif
 
 # ---------------- ace-qtreactor ----------------
 
 %if %{?_with_qt:1}%{!?_with_qt:0}
-%postun -n ace-qtreactor
+%postun -n ace-qtreactor%{_name_postfix}
 /sbin/ldconfig
 %endif
 
 # ---------------- ace-tkreactor ----------------
 
 %if %{?_with_tk:1}%{!?_with_tk:0}
-%postun -n ace-tkreactor
+%postun -n ace-tkreactor%{_name_postfix}
 /sbin/ldconfig
 %endif
 
 # ---------------- ace-xtreactor ----------------
 
 %if %{?_with_xt:1}%{!?_with_xt:0}
-%postun -n ace-xtreactor
+%postun -n ace-xtreactor%{_name_postfix}
 /sbin/ldconfig
 %endif
 
@@ -1962,7 +1971,7 @@ fi
 
 # ---------------- ace ----------------
 
-%files -n ace
+%files -n ace%{_name_postfix}
 %defattr(-,root,root,-)
 %dir /opt/suse
 %dir %{_libdir}
@@ -1987,7 +1996,7 @@ fi
 
 # ---------------- ace-devel ----------------
 
-%files -n ace-devel -f ace-devel-files.list
+%files -n ace%{_name_postfix}-devel -f ace-devel-files.list
 %defattr(-,root,root,-)
 %{_libdir}/libACE.so
 %{_libdir}/libACE_ETCL_Parser.so
@@ -2035,7 +2044,7 @@ fi
 
 # ---------------- ace-xml ----------------
 
-%files -n ace-xml
+%files -n ace-xml%{_name_postfix}
 %defattr(-,root,root,-)
 %{_libdir}/libACEXML*.so.%{ACEVERSO}
 
@@ -2047,7 +2056,7 @@ fi
 
 # ---------------- ace-gperf ----------------
 
-%files -n ace-gperf
+%files -n ace-gperf%{_name_postfix}
 %defattr(-,root,root,-)
 %{_bindir}/ace_gperf
 %{_libdir}/libACE_gperf_lib.so.%{ACEVERSO}
@@ -2062,7 +2071,7 @@ fi
 
 # ---------------- ace-xml-devel ----------------
 
-%files -n ace-xml-devel -f acexml-headers.list
+%files -n ace-xml%{_name_postfix}-devel -f acexml-headers.list
 %defattr(-,root,root,-)
 %{_libdir}/libACEXML*.so
 
@@ -2079,7 +2088,7 @@ fi
 
 # ---------------- ace-kokyu ----------------
 
-%files -n ace-kokyu
+%files -n ace-kokyu%{_name_postfix}
 %defattr(-,root,root,-)
 %{_libdir}/libKokyu.so.%{ACEVERSO}
 
@@ -2091,7 +2100,7 @@ fi
 
 # ---------------- ace-kokyu-devel ----------------
 
-%files -n ace-kokyu-devel -f kokyu-headers.list
+%files -n ace-kokyu%{_name_postfix}-devel -f kokyu-headers.list
 %defattr(-,root,root,-)
 %{_libdir}/libKokyu.so
 
@@ -2105,7 +2114,7 @@ fi
 
 %if 0%{?have_fox} == 1
 %if %{?_with_fox:1}%{!?_with_fox:0}
-%files -n ace-foxreactor
+%files -n ace-foxreactor%{_name_postfix}
 %defattr(-,root,root,-)
 %{_libdir}/libACE_FoxReactor.so.%{ACEVERSO}
 
@@ -2121,7 +2130,7 @@ fi
 
 %if %{?_with_fl:1}%{!?_with_fl:0}
 
-%files -n ace-flreactor
+%files -n ace-flreactor%{_name_postfix}
 %defattr(-,root,root,-)
 %{_libdir}/libACE_FlReactor.so.%{ACEVERSO}
 
@@ -2137,7 +2146,7 @@ fi
 
 %if %{?_with_fl:1}%{!?_with_fl:0}
 
-%files -n ace-flreactor-devel
+%files -n ace-flreactor%{_name_postfix}-devel
 %defattr(-,root,root,-)
 %dir %{_includedir}/ace/FlReactor
 %{_libdir}/libACE_FlReactor.so
@@ -2156,7 +2165,7 @@ fi
 
 %if %{?_with_qt:1}%{!?_with_qt:0}
 
-%files -n ace-qtreactor
+%files -n ace%{_name_postfix}-qtreactor
 %defattr(-,root,root,-)
 %{_libdir}/libACE_QtReactor.so.%{ACEVERSO}
 
@@ -2172,7 +2181,7 @@ fi
 
 %if %{?_with_qt:1}%{!?_with_qt:0}
 
-%files -n ace-qtreactor-devel
+%files -n ace-qtreactor%{_name_postfix}-devel
 %defattr(-,root,root,-)
 %{_libdir}/libACE_QtReactor.so
 %dir %{_includedir}/ace/QtReactor
@@ -2191,7 +2200,7 @@ fi
 
 %if %{?_with_tk:1}%{!?_with_tk:0}
 
-%files -n ace-tkreactor
+%files -n ace-tkreactor%{_name_postfix}
 %defattr(-,root,root,-)
 %{_libdir}/libACE_TkReactor.so.%{ACEVERSO}
 
@@ -2207,7 +2216,7 @@ fi
 
 %if %{?_with_tk:1}%{!?_with_tk:0}
 
-%files -n ace-tkreactor-devel
+%files -n ace-tkreactor%{_name_postfix}-devel
 %defattr(-,root,root,-)
 %{_libdir}/libACE_TkReactor.so
 %dir %{_includedir}/ace/TkReactor
@@ -2226,7 +2235,7 @@ fi
 
 %if %{?_with_xt:1}%{!?_with_xt:0}
 
-%files -n ace-xtreactor
+%files -n ace-xtreactor%{_name_postfix}
 %defattr(-,root,root,-)
 %{_libdir}/libACE_XtReactor.so.%{ACEVERSO}
 
@@ -2242,7 +2251,7 @@ fi
 
 %if %{?_with_xt:1}%{!?_with_xt:0}
 
-%files -n ace-xtreactor-devel
+%files -n ace-xtreactor%{_name_postfix}-devel
 %defattr(-,root,root,-)
 %{_libdir}/libACE_XtReactor.so
 %dir %{_includedir}/ace/XtReactor
