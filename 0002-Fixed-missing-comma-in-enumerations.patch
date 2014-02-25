@@ -1,0 +1,49 @@
+From 80b2b846385d803415e9ba1e240050b2dc01a700 Mon Sep 17 00:00:00 2001
+From: stanleyk <stanleyk@ae88bc3d-4319-0410-8dbf-d08b4c9d3795>
+Date: Sat, 16 Feb 2013 21:54:39 +0000
+Subject: [PATCH 2/7] Fixed missing comma in enumerations
+
+Backport from: svn://svn.dre.vanderbilt.edu/DOC/Middleware/trunk@96828
+---
+ ACE/ChangeLog             | 10 ++++++++--
+ ACE/ace/SSL/SSL_Context.h |  2 +-
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/ACE/ChangeLog b/ACE/ChangeLog
+index acbcf10..4bc64ab 100644
+--- a/ACE/ChangeLog
++++ b/ACE/ChangeLog
+@@ -1,9 +1,15 @@
++Sat Feb 16 21:53:26 UTC 2013  Kevin Stanley  <stanleyk@ociweb.com>
++
++        * ace/SSL/SSL_Context.h:
++
++          Fixed missing ',' in enumerated type value.
++
+ Sat Feb 16 14:42:54 UTC 2013  Douglas C. Schmidt  <schmidt@dre.vanderbilt.edu>
+ 
+         * examples/C++NPv2/AIO_Client_Logging_Daemon.cpp: Moved the definition of
+-  
++
+           ACE_FACTORY_DEFINE (AIO_CLD, AIO_Client_Logging_Daemon)
+-        
++
+           to the right place in the #ifdefs.  Thanks to Journeyer J. Joh
+           <oosaprogrammer at gmail dot com> for reporting this.
+ 
+diff --git a/ACE/ace/SSL/SSL_Context.h b/ACE/ace/SSL/SSL_Context.h
+index 07e4abd..ac5483a 100644
+--- a/ACE/ace/SSL/SSL_Context.h
++++ b/ACE/ace/SSL/SSL_Context.h
+@@ -93,7 +93,7 @@ public:
+     SSLv23,
+     TLSv1_client,
+     TLSv1_server,
+-    TLSv1
++    TLSv1,
+     TLSv1_1_client,
+     TLSv1_1_server,
+     TLSv1_1,
+-- 
+1.7.12.4
+

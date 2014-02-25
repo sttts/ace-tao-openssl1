@@ -1,0 +1,43 @@
+From c958647dbde45e283a455778b4d3863608d6aafe Mon Sep 17 00:00:00 2001
+From: "Dr. Stefan Schimanski" <stefan.schimanski@gmail.com>
+Date: Mon, 17 Feb 2014 05:01:22 -0500
+Subject: [PATCH 4/7] Use const SSL_METHOD for OpenSSL 1.0.x support
+
+---
+ ACE/m4/tls.m4 | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/ACE/m4/tls.m4 b/ACE/m4/tls.m4
+index f1c47e3..aaaacdc 100644
+--- a/ACE/m4/tls.m4
++++ b/ACE/m4/tls.m4
+@@ -96,7 +96,7 @@ AC_DEFUN([ACE_CHECK_TLS],
+ CRYPTO_set_locking_callback (0);
+ SSLeay_add_ssl_algorithms ();
+ SSL_load_error_strings ();
+-SSL_METHOD * meth = TLSv1_method ();
++const SSL_METHOD * meth = TLSv1_method ();
+ SSL_CTX * ctx = SSL_CTX_new (meth);
+ SSL * ssl = SSL_new (ctx);
+ int fd = 2000;  // Dummy file descriptor value.
+@@ -131,7 +131,7 @@ SSL_shutdown (ssl);
+ CRYPTO_set_locking_callback (0);
+ SSLeay_add_ssl_algorithms ();
+ SSL_load_error_strings ();
+-SSL_METHOD * meth = TLSv1_method ();
++const SSL_METHOD * meth = TLSv1_method ();
+ SSL_CTX * ctx = SSL_CTX_new (meth);
+ SSL * ssl = SSL_new (ctx);
+ int fd = 2000;  // Dummy file descriptor value.
+@@ -186,7 +186,7 @@ SSL_shutdown (ssl);
+ CRYPTO_set_locking_callback (0);
+ SSLeay_add_ssl_algorithms ();
+ SSL_load_error_strings ();
+-SSL_METHOD * meth = TLSv1_method ();
++const SSL_METHOD * meth = TLSv1_method ();
+ SSL_CTX * ctx = SSL_CTX_new (meth);
+ SSL * ssl = SSL_new (ctx);
+ int fd = 2000;  // Dummy file descriptor value.
+-- 
+1.7.12.4
+

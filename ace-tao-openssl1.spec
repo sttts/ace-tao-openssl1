@@ -71,6 +71,10 @@ URL:          http://www.cs.wustl.edu/~schmidt/ACE.html
 License:      DOC License
 Source0:      http://download.dre.vanderbilt.edu/previous_versions/ACE+TAO+CIAO-src-%{ACEVER}.tar.gz
 Source1:      ace-tao-rpmlintrc
+Patch: 0001-Backport-of-TLS-1.2-support-to-ACE-5.8.1.patch
+Patch1: 0002-Fixed-missing-comma-in-enumerations.patch
+Patch2: 0003-Removed-extraneous-characters-which-were-preventing-.patch
+Patch3: 0004-Use-const-SSL_METHOD-for-OpenSSL-1.0.x-support.patch
 BuildRoot:    %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %if 0%{?fedora} || 0%{?rhel_version} || 0%{?centos_version}
@@ -815,6 +819,10 @@ using the XtResource_Factory.
 
 %prep
 %setup -q -n ACE_wrappers
+%patch -p2
+%patch1 -p2
+%patch2 -p2
+%patch3 -p2
 
 # ================================================================
 # build
