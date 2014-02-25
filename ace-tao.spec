@@ -3,6 +3,8 @@
 %define TAOVER  1.8.1
 %define CIAOVER 0.8.1
 
+%define _libdir /opt/suse/%{_lib}
+
 # Conditional build
 # Default values are
 #                    --with rnq         (ACE_HAS_REACTOR_NOTIFICATION_QUEUE)
@@ -1962,6 +1964,8 @@ fi
 
 %files -n ace
 %defattr(-,root,root,-)
+%dir /opt/suse
+%dir %{_libdir}
 %{_libdir}/libACE.so.%{ACEVERSO}
 %{_libdir}/libACE_ETCL_Parser.so.%{ACEVERSO}
 %{_libdir}/libACE_ETCL.so.%{ACEVERSO}
