@@ -859,6 +859,8 @@ EOF
 cat > $ACE_ROOT/include/makeinclude/platform_macros.GNU <<EOF
 CCFLAGS += %optflags
 CFLAGS += %optflags
+LDFLAGS += -Wl,-rpath,/opt/suse/%_lib
+INSTALL_PREFIX = /opt/suse
 EOF
 %endif
 
