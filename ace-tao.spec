@@ -1531,6 +1531,7 @@ exit 0
 # ---------------- ace-gperf ----------------
 
 %post -n ace-gperf
+/sbin/ldconfig
 
 %if 0%{?suse_version}
 %install_info --info-dir=%_infodir %_infodir/ace_gperf.info%{_extension}
@@ -1788,6 +1789,11 @@ fi
 # ---------------- ace-kokyu ----------------
 
 %postun -n ace-kokyu
+/sbin/ldconfig
+
+# ---------------- ace-gperf ----------------
+
+%postun -n ace-gperf
 /sbin/ldconfig
 
 # ---------------- ace-foxreactor ----------------
