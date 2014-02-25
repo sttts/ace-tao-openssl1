@@ -1,0 +1,94 @@
+From e052a26391ed66001cac931b9dd8f7110039fa24 Mon Sep 17 00:00:00 2001
+From: "Dr. Stefan Schimanski" <stefan.schimanski@gmail.com>
+Date: Mon, 24 Feb 2014 08:54:02 -0500
+Subject: [PATCH 6/7] Add ACE_SSL_CONTEXT method to set cipher list and order
+
+---
+ ACE/ace/SSL/SSL_Context.cpp                 | 21 +++++++++++++++++++++
+ ACE/ace/SSL/SSL_Context.h                   |  8 ++++++++
+ ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp | 18 ++++++++++++++++++
+ 3 files changed, 47 insertions(+)
+
+diff --git a/ACE/ace/SSL/SSL_Context.cpp b/ACE/ace/SSL/SSL_Context.cpp
+index 9d7f6f1..0212467 100644
+--- a/ACE/ace/SSL/SSL_Context.cpp
++++ b/ACE/ace/SSL/SSL_Context.cpp
+@@ -688,6 +688,27 @@ int ACE_SSL_Context::set_ecdh_curve(const char * curve_name)
+   return 0;
+ }
+ 
++int ACE_SSL_Context::set_cipher_list(const char * list)
++{
++  if (SSL_CTX_set_cipher_list(this->context_, list) == 0)
++    return -1;
++  return 0;
++}
++
++int ACE_SSL_Context::prefer_server_cipher_list(bool on)
++{
++  if (on) {
++    long options = SSL_CTX_set_options(this->context_, SSL_OP_CIPHER_SERVER_PREFERENCE);
++    if (options & SSL_OP_CIPHER_SERVER_PREFERENCE == 0)
++      return -1;
++  } else {
++    long options = SSL_CTX_clear_options(this->context_, SSL_OP_CIPHER_SERVER_PREFERENCE);
++    if (options & SSL_OP_CIPHER_SERVER_PREFERENCE != 0)
++      return -1;
++  }
++  return 0;
++}
++
+ // ****************************************************************
+ 
+ #if defined (ACE_HAS_EXPLICIT_STATIC_TEMPLATE_MEMBER_INSTANTIATION)
+diff --git a/ACE/ace/SSL/SSL_Context.h b/ACE/ace/SSL/SSL_Context.h
+index 341759b..35cb55d 100644
+--- a/ACE/ace/SSL/SSL_Context.h
++++ b/ACE/ace/SSL/SSL_Context.h
+@@ -349,6 +349,14 @@ public:
+    */
+   int set_ecdh_curve(const char * curve_name);
+ 
++  /**
++   * Set the list of ciphers allowed to be used.
++   * The syntax of the cipher list string is described in 
++   * the ciphers(1) man page.
++   */
++  int set_cipher_list(const char * list);
++  int prefer_server_cipher_list(bool on);
++
+ private:
+ 
+   /// Verify if the context has been initialized or not.
+diff --git a/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp b/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp
+index 3187935..5a9571a 100644
+--- a/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp
++++ b/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp
+@@ -425,6 +425,24 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
+     ACE_ERROR ((LM_ERROR, "Could not set the ecdh curve\n"));
+   }
+ 
++  // proposed list from: https://community.qualys.com/blogs/securitylabs/2013/08/05/configuring-apache-nginx-and-openssl-for-forward-secrecy
++  const char * cipher_list1_with_rc4 = "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS";
++  const char * cipher_list1_without_rc4 = "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4";
++  const char * cipher_list1_with_rc4_for_ie = "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:+RC4:RC4";
++
++  // proposed list from: https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
++  const char * cipher_list2 = "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS";
++
++  // proposed list from: http://vincent.bernat.im/en/blog/2011-ssl-perfect-forward-secrecy.html
++  const char * cipher_list3 = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-RC4-SHA:ECDHE-RSA-AES128-SHA:RC4:HIGH:!MD5:!aNULL:!EDH";
++
++  if (context->set_cipher_list (cipher_list1_with_rc4_for_ie) != 0) {
++    ACE_ERROR ((LM_ERROR, "Could not set the ciphers list\n"));
++  }
++  if (context->prefer_server_cipher_list(true) != 0) {
++    ACE_ERROR ((LM_ERROR, "Could not set option to prefer server ciphers list\n"));
++  }  
++
+   u_short port = ACE_DEFAULT_SERVER_PORT;
+ 
+   if (argc > 1)
+-- 
+1.7.12.4
+

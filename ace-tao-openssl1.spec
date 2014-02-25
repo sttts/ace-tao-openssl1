@@ -75,6 +75,10 @@ Patch: 0001-Backport-of-TLS-1.2-support-to-ACE-5.8.1.patch
 Patch1: 0002-Fixed-missing-comma-in-enumerations.patch
 Patch2: 0003-Removed-extraneous-characters-which-were-preventing-.patch
 Patch3: 0004-Use-const-SSL_METHOD-for-OpenSSL-1.0.x-support.patch
+Patch4: 0005-Add-set_ecdh_curve-method-to-ACE_SSL_CONTEXT.patch
+Patch5: 0006-Add-ACE_SSL_CONTEXT-method-to-set-cipher-list-and-or.patch
+Patch6: 0007-Add-dh_params-to-IPC_SAP-SSL-server-example.patch
+Patch7: 0008-Clean-up-SSL-server-example.patch
 BuildRoot:    %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %if 0%{?fedora} || 0%{?rhel_version} || 0%{?centos_version}
@@ -823,6 +827,10 @@ using the XtResource_Factory.
 %patch1 -p2
 %patch2 -p2
 %patch3 -p2
+%patch4 -p2
+%patch5 -p2
+%patch6 -p2
+%patch7 -p2
 
 # ================================================================
 # build
@@ -984,7 +992,7 @@ EOF
 %endif
 
 # Need to regenerate all of the GNUMakefiles ...
-bin/mwc.pl -type gnuace TAO/TAO_ACE.mwc
+bin/mwc.pl -type gnuace TAO/TAO_ACE.mwc examples/examples.mwc
 
 MAKECMD="make %{?_smp_mflags}"
 
@@ -994,7 +1002,8 @@ for ace_comp in \
     Kokyu \
     ACEXML \
     apps/gperf \
-    protocols;
+    protocols \
+    examples/IPC_SAP/SSL_SAP;
 do
     $MAKECMD -C $ACE_ROOT/$ace_comp;
 done
@@ -1382,6 +1391,46 @@ ln -sfn %{_includedir}/orbsvcs %{buildroot}%{_datadir}/tao/orbsvcs
 ln -sfn %{_suselibdir} %{buildroot}%{_datadir}/ace/lib
 
 cp -a ${TAO_ROOT}/MPC/* %{buildroot}%{_datadir}/tao/MPC
+cat >README_PFS <<EOF
+README for Perfect Forward Secrecy
+==================================
+
+This version of ACE is extended with support for Perfect Forward Secrecy using
+Elliptic Curve Diffie-Hellmann Ephemeral cryptography. To test the behaviour
+of ACE in providing this feature, the binary ace-openssl1-server is
+provided, being an extended version examples/IPC_SAP/SSL_SAP/SSL-server.cpp 
+from the ACE source code.
+
+The server binary assumes:
+- ./dummy.pem to be the RSA certificate
+- ./key.pem to be the RSA private key
+- ./dh-2048.pem to be 2048 bit DH-params
+
+The syntax is the following:
+
+  ace-openssl1-server [PORT [ELLIPTIC_CURVE_NAME [CIPHER_LIST]]]
+
+with
+
+  PORT                - server will listen on the TCP port PORT and PORT+1
+                        (default 20002)
+
+  ELLIPTIC_CURVE_NAME - the curve to use for ECDH(E),
+                        compare "openssl1 ecparam -list_curves" 
+                        (default prime256v1)
+
+  CIPHER_LIST         - the cipher list described in ciphers(1).
+
+Each of these can be an empty string, which means to use the default value.
+
+A running server process on port 20002 can be tested using openssl's s_client:
+
+  openssl1 s_client -state -debug -connect 127.0.0.1:20002
+
+Dr. Stefan Schimanski <stefan.schimanski@gmail.com>
+EOF
+
+install ${ACE_ROOT}/examples/IPC_SAP/SSL_SAP/server %{buildroot}%{_bindir}/ace-openssl1-server
 
 # Set TAO_IDL setting for the user
 cat > %{buildroot}%{_datadir}/ace/include/makeinclude/platform_macros.GNU.tmp <<EOF
@@ -1995,6 +2044,8 @@ fi
 %{_suselibdir}/libACE_SSL.so.%{ACEVERSO}
 %{_suselibdir}/libACE_INet.so.%{ACEVERSO}
 
+%{_bindir}/ace-openssl1-server
+
 %doc ACE-INSTALL.html
 %doc AUTHORS
 %doc COPYING
@@ -2003,6 +2054,11 @@ fi
 %doc README
 %doc THANKS
 %doc VERSION
+
+%doc examples/IPC_SAP/SSL_SAP/dummy.pem
+%doc examples/IPC_SAP/SSL_SAP/key.pem
+%doc examples/IPC_SAP/SSL_SAP/dh-2048.pem
+%doc README_PFS
 
 # ---------------- ace-devel ----------------
 

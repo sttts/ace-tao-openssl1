@@ -1,0 +1,43 @@
+From 852c1c1080986ecd5c475dfef60455385b8f8f29 Mon Sep 17 00:00:00 2001
+From: "Dr. Stefan Schimanski" <stefan.schimanski@gmail.com>
+Date: Mon, 24 Feb 2014 09:48:57 -0500
+Subject: [PATCH 7/7] Add dh_params to IPC_SAP/SSL/server example
+
+---
+ ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp | 4 ++++
+ ACE/examples/IPC_SAP/SSL_SAP/dh-2048.pem    | 8 ++++++++
+ 2 files changed, 12 insertions(+)
+ create mode 100644 ACE/examples/IPC_SAP/SSL_SAP/dh-2048.pem
+
+diff --git a/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp b/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp
+index 5a9571a..7a96853 100644
+--- a/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp
++++ b/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp
+@@ -425,6 +425,10 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
+     ACE_ERROR ((LM_ERROR, "Could not set the ecdh curve\n"));
+   }
+ 
++  if (context->dh_params("dh-2048.pem", SSL_FILETYPE_PEM) != 0) {
++    ACE_ERROR ((LM_ERROR, "Could not load dh_params\n"));
++  }
++
+   // proposed list from: https://community.qualys.com/blogs/securitylabs/2013/08/05/configuring-apache-nginx-and-openssl-for-forward-secrecy
+   const char * cipher_list1_with_rc4 = "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS";
+   const char * cipher_list1_without_rc4 = "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4";
+diff --git a/ACE/examples/IPC_SAP/SSL_SAP/dh-2048.pem b/ACE/examples/IPC_SAP/SSL_SAP/dh-2048.pem
+new file mode 100644
+index 0000000..5285711
+--- /dev/null
++++ b/ACE/examples/IPC_SAP/SSL_SAP/dh-2048.pem
+@@ -0,0 +1,8 @@
++-----BEGIN DH PARAMETERS-----
++MIIBCAKCAQEAmM64ioCz322dZ3nNdVaFZFSmOac+sAcbfdnWVGCNT+zLJ6B1xUZ1
++dV9bb1W4ndys79bxSsU8tqjBdadJ6bSUrTRZKJnFBtehLMVbQGUZi1dvFPFCKbxx
++Y3LCPJfE1ZltAaTCxndk3Exh3SDLnOpSCGzg/fn1/f83iUFULf0eZcgKz7FzGwNR
++/crdHMTiW/FyE/yiozkyJvnlR6Pi0hU4pFati0HPwvCR4KPKoWgm758vt3EbLwyO
++d6nc1JOuiVwFOvwABixopBxTzSp7vgU4JeyQ7LlwgVHtMcbJZcTv1ZJVbNaVHeOR
++ljrMHWOOFE5EPqa1GmunzBlHzQ7F7ByKowIBAg==
++-----END DH PARAMETERS-----
+-- 
+1.7.12.4
+
