@@ -1049,7 +1049,7 @@ export CXXFLAGS="${CXXFLAGS:-%optflags}"
         --sysconfdir=%{_sysconfdir} \
         --datadir=%{_datadir} \
         --includedir=%{_includedir} \
-        --libdir=%{_libdir} \
+        --libdir=%{_suselibdir} \
         --libexecdir=%{_libexecdir} \
         --localstatedir=%{_localstatedir} \
         --sharedstatedir=%{_sharedstatedir} \
@@ -1098,23 +1098,24 @@ export DANCE_ROOT=$CIAO_ROOT/DAnCE
 # ---------------- Runtime Components ----------------
 
 # install shared libraries
+install -d %{buildroot}%{_suselibdir}
 install -d %{buildroot}%{_libdir}
 
 # ACE + XML libraries
 INSTLIBS=`ls ${ACE_ROOT}/lib/libACE*.so.%{ACEVERSO}`
-install $INSTLIBS %{buildroot}%{_libdir}
+install $INSTLIBS %{buildroot}%{_suselibdir}
 
 # ACE-Kokyu libraries
 INSTLIBS=`ls ${ACE_ROOT}/lib/libKokyu.so.%{ACEVERSO}`
-install $INSTLIBS %{buildroot}%{_libdir}
+install $INSTLIBS %{buildroot}%{_suselibdir}
 
 # TAO libraries
 INSTLIBS=`ls ${ACE_ROOT}/lib/libTAO*.so.%{TAOVERSO}`
-install $INSTLIBS %{buildroot}%{_libdir}
+install $INSTLIBS %{buildroot}%{_suselibdir}
 
 # Create un-versioned symbolic links for libraries
-(cd %{buildroot}%{_libdir} && \
- ls *.so.* | awk 'BEGIN{FS="."}{print "ln -sf " $0 " " $1 "." $2;}' | sh)
+(cd %{buildroot}%{_suselibdir} && \
+ ls *.so.* | awk 'BEGIN{FS="."}{print "ln -sf " $0 " " $1 "." $2 "; ln -sf %{_suselibdir}/" $0 " %{buildroot}%{_libdir}/" $1 "." $2;}' | sh -x)
 
 # install binaries
 install -d %{buildroot}%{_sbindir}
@@ -1277,7 +1278,7 @@ rm -f tao-headers.tmp
 )
 
 # install the TAO_IDL compiler
-install -d %{buildroot}%{_libdir}
+install -d %{buildroot}%{_suselibdir}
 
 install -d %{buildroot}%{_bindir}
 install ${ACE_ROOT}/bin/ace_gperf %{buildroot}%{_bindir}
@@ -1370,7 +1371,7 @@ install ${ACE_ROOT}/bin/{ACEutils,Uniqueid}.pm %{buildroot}%{_datadir}/ace/bin
 ln -sfn %{_includedir}/ace %{buildroot}%{_datadir}/ace
 ln -sfn %{_includedir}/tao %{buildroot}%{_datadir}/tao
 ln -sfn %{_includedir}/orbsvcs %{buildroot}%{_datadir}/tao/orbsvcs
-ln -sfn %{_libdir} %{buildroot}%{_datadir}/ace/lib
+ln -sfn %{_suselibdir} %{buildroot}%{_datadir}/ace/lib
 
 cp -a ${TAO_ROOT}/MPC/* %{buildroot}%{_datadir}/tao/MPC
 
@@ -1418,26 +1419,27 @@ install ${ACE_ROOT}/apps/gperf/ace_gperf.info %{buildroot}%{_infodir}
 # ================================================================
 
 # Make a list of all shared objects.
-(cd %{buildroot}/%{_libdir} && ls *.so | \
-        awk '{ print "%{_libdir}/"$1; }' | \
+(cd %{buildroot}/%{_suselibdir} && ls *.so | \
+        awk '{ print "%{_suselibdir}/"$1; }' | \
         sort) > all-so.list
 
 # Make a list of likely svc.conf targets.
-(cd %{buildroot}/%{_libdir} && ls *.so | \
+(cd %{buildroot}/%{_suselibdir} && ls *.so | \
     nm --print-file-name *.so | \
     grep _make_ | \
-    awk 'BEGIN { FS=":"} /^[^:]+:/ { print "%{_libdir}/"$1; }' | \
+    awk 'BEGIN { FS=":"} /^[^:]+:/ { print "%{_suselibdir}/"$1; }' | \
     sort -u) > rough-svc-so.list
 
 # Remove false positives (IMPORTANT keep this list sorted!)
 cat > falsepos-svc-so.list <<EOF
-%{_libdir}/libACE.so
-%{_libdir}/libTAO.so
+%{_suselibdir}/libACE.so
+%{_suselibdir}/libTAO.so
 EOF
 comm -2 -3 rough-svc-so.list falsepos-svc-so.list > svc-so.list
 
 # Find the list of non-sv.conf target files.
 comm -2 -3 all-so.list svc-so.list > nonsvc-so.list
+sed 's,%{_suselibdir},%{_libdir},' all-so.list >> nonsvc-so.list
 
 # Generate file lists.
 grep libACE svc-so.list > ace-svc-so.list
@@ -1974,16 +1976,16 @@ fi
 %files -n ace%{_name_postfix}
 %defattr(-,root,root,-)
 %dir /opt/suse
-%dir %{_libdir}
-%{_libdir}/libACE.so.%{ACEVERSO}
-%{_libdir}/libACE_ETCL_Parser.so.%{ACEVERSO}
-%{_libdir}/libACE_ETCL.so.%{ACEVERSO}
-%{_libdir}/libACE_HTBP.so.%{ACEVERSO}
-%{_libdir}/libACE_Monitor_Control.so.%{ACEVERSO}
-%{_libdir}/libACE_RMCast.so.%{ACEVERSO}
-%{_libdir}/libACE_TMCast.so.%{ACEVERSO}
-%{_libdir}/libACE_SSL.so.%{ACEVERSO}
-%{_libdir}/libACE_INet.so.%{ACEVERSO}
+%dir %{_suselibdir}
+%{_suselibdir}/libACE.so.%{ACEVERSO}
+%{_suselibdir}/libACE_ETCL_Parser.so.%{ACEVERSO}
+%{_suselibdir}/libACE_ETCL.so.%{ACEVERSO}
+%{_suselibdir}/libACE_HTBP.so.%{ACEVERSO}
+%{_suselibdir}/libACE_Monitor_Control.so.%{ACEVERSO}
+%{_suselibdir}/libACE_RMCast.so.%{ACEVERSO}
+%{_suselibdir}/libACE_TMCast.so.%{ACEVERSO}
+%{_suselibdir}/libACE_SSL.so.%{ACEVERSO}
+%{_suselibdir}/libACE_INet.so.%{ACEVERSO}
 
 %doc ACE-INSTALL.html
 %doc AUTHORS
@@ -1998,6 +2000,17 @@ fi
 
 %files -n ace%{_name_postfix}-devel -f ace-devel-files.list
 %defattr(-,root,root,-)
+%dir /opt/suse
+%dir %{_suselibdir}
+%{_suselibdir}/libACE.so
+%{_suselibdir}/libACE_ETCL_Parser.so
+%{_suselibdir}/libACE_ETCL.so
+%{_suselibdir}/libACE_HTBP.so
+%{_suselibdir}/libACE_Monitor_Control.so
+%{_suselibdir}/libACE_RMCast.so
+%{_suselibdir}/libACE_TMCast.so
+%{_suselibdir}/libACE_SSL.so
+%{_suselibdir}/libACE_INet.so
 %{_libdir}/libACE.so
 %{_libdir}/libACE_ETCL_Parser.so
 %{_libdir}/libACE_ETCL.so
@@ -2014,6 +2027,10 @@ fi
 %{_datadir}/ace/ace
 %{_datadir}/ace/lib
 %config %{_sysconfdir}/profile.d/ace-devel.sh
+
+%exclude %{_suselibdir}/libACEXML*.so
+%exclude %{_libdir}/libACEXML*.so
+
 
 %if %{?_with_fox:1}%{!?_with_fox:0}
 %exclude %{_includedir}/ace/FoxReactor/FoxReactor.h
@@ -2046,7 +2063,7 @@ fi
 
 %files -n ace-xml%{_name_postfix}
 %defattr(-,root,root,-)
-%{_libdir}/libACEXML*.so.%{ACEVERSO}
+%{_suselibdir}/libACEXML*.so.%{ACEVERSO}
 
 %doc AUTHORS
 %doc COPYING
@@ -2059,7 +2076,7 @@ fi
 %files -n ace-gperf%{_name_postfix}
 %defattr(-,root,root,-)
 %{_bindir}/ace_gperf
-%{_libdir}/libACE_gperf_lib.so.%{ACEVERSO}
+%{_suselibdir}/libACE_gperf_lib.so.%{ACEVERSO}
 %attr(0644,root,root) %{_mandir}/man1/ace_gperf.1%{_extension}
 %attr(0644,root,root) %{_infodir}/ace_gperf.info%{_extension}
 
@@ -2073,6 +2090,7 @@ fi
 
 %files -n ace-xml%{_name_postfix}-devel -f acexml-headers.list
 %defattr(-,root,root,-)
+%{_suselibdir}/libACEXML*.so
 %{_libdir}/libACEXML*.so
 
 # These get missed by the automatic list generator because they
@@ -2090,7 +2108,7 @@ fi
 
 %files -n ace-kokyu%{_name_postfix}
 %defattr(-,root,root,-)
-%{_libdir}/libKokyu.so.%{ACEVERSO}
+%{_suselibdir}/libKokyu.so.%{ACEVERSO}
 
 %doc AUTHORS
 %doc COPYING
@@ -2102,6 +2120,7 @@ fi
 
 %files -n ace-kokyu%{_name_postfix}-devel -f kokyu-headers.list
 %defattr(-,root,root,-)
+%{_suselibdir}/libKokyu.so
 %{_libdir}/libKokyu.so
 
 %doc AUTHORS
@@ -2116,7 +2135,7 @@ fi
 %if %{?_with_fox:1}%{!?_with_fox:0}
 %files -n ace-foxreactor%{_name_postfix}
 %defattr(-,root,root,-)
-%{_libdir}/libACE_FoxReactor.so.%{ACEVERSO}
+%{_suselibdir}/libACE_FoxReactor.so.%{ACEVERSO}
 
 %doc AUTHORS
 %doc COPYING
@@ -2132,7 +2151,7 @@ fi
 
 %files -n ace-flreactor%{_name_postfix}
 %defattr(-,root,root,-)
-%{_libdir}/libACE_FlReactor.so.%{ACEVERSO}
+%{_suselibdir}/libACE_FlReactor.so.%{ACEVERSO}
 
 %doc AUTHORS
 %doc COPYING
@@ -2149,6 +2168,7 @@ fi
 %files -n ace-flreactor%{_name_postfix}-devel
 %defattr(-,root,root,-)
 %dir %{_includedir}/ace/FlReactor
+%{_suselibdir}/libACE_FlReactor.so
 %{_libdir}/libACE_FlReactor.so
 %{_includedir}/ace/FlReactor/FlReactor.h
 %{_includedir}/ace/FlReactor/ACE_FlReactor_export.h
@@ -2167,7 +2187,7 @@ fi
 
 %files -n ace%{_name_postfix}-qtreactor
 %defattr(-,root,root,-)
-%{_libdir}/libACE_QtReactor.so.%{ACEVERSO}
+%{_suselibdir}/libACE_QtReactor.so.%{ACEVERSO}
 
 %doc AUTHORS
 %doc COPYING
@@ -2183,6 +2203,7 @@ fi
 
 %files -n ace-qtreactor%{_name_postfix}-devel
 %defattr(-,root,root,-)
+%{_suselibdir}/libACE_QtReactor.so
 %{_libdir}/libACE_QtReactor.so
 %dir %{_includedir}/ace/QtReactor
 %{_includedir}/ace/QtReactor/QtReactor.h
@@ -2202,7 +2223,7 @@ fi
 
 %files -n ace-tkreactor%{_name_postfix}
 %defattr(-,root,root,-)
-%{_libdir}/libACE_TkReactor.so.%{ACEVERSO}
+%{_suselibdir}/libACE_TkReactor.so.%{ACEVERSO}
 
 %doc AUTHORS
 %doc COPYING
@@ -2218,6 +2239,7 @@ fi
 
 %files -n ace-tkreactor%{_name_postfix}-devel
 %defattr(-,root,root,-)
+%{_suselibdir}/libACE_TkReactor.so
 %{_libdir}/libACE_TkReactor.so
 %dir %{_includedir}/ace/TkReactor
 %{_includedir}/ace/TkReactor/TkReactor.h
@@ -2237,7 +2259,7 @@ fi
 
 %files -n ace-xtreactor%{_name_postfix}
 %defattr(-,root,root,-)
-%{_libdir}/libACE_XtReactor.so.%{ACEVERSO}
+%{_suselibdir}/libACE_XtReactor.so.%{ACEVERSO}
 
 %doc AUTHORS
 %doc COPYING
@@ -2253,6 +2275,7 @@ fi
 
 %files -n ace-xtreactor%{_name_postfix}-devel
 %defattr(-,root,root,-)
+%{_suselibdir}/libACE_XtReactor.so
 %{_libdir}/libACE_XtReactor.so
 %dir %{_includedir}/ace/XtReactor
 %{_includedir}/ace/XtReactor/XtReactor.h
@@ -2284,20 +2307,23 @@ fi
 %files -n tao -f tao-svc-so.list
 %defattr(-,root,root,-)
 %{_datadir}/tao
+%exclude %{_datadir}/tao/MPC
+%exclude %{_datadir}/tao/tao
+%exclude %{_datadir}/tao/orbsvcs
 
-%{_libdir}/libTAO*.so.%{TAOVERSO}
+%{_suselibdir}/libTAO*.so.%{TAOVERSO}
 
 %if %{?_with_fl:1}%{!?_with_fl:0}
-%exclude %{_libdir}/libTAO_FlResource.so*
+%exclude %{_suselibdir}/libTAO_FlResource.so*
 %endif
 %if %{?_with_qt:1}%{!?_with_qt:0}
-%exclude %{_libdir}/libTAO_QtResource.so*
+%exclude %{_suselibdir}/libTAO_QtResource.so*
 %endif
 %if %{?_with_tk:1}%{!?_with_tk:0}
-%exclude %{_libdir}/libTAO_TkResource.so*
+%exclude %{_suselibdir}/libTAO_TkResource.so*
 %endif
 %if %{?_with_xt:1}%{!?_with_xt:0}
-%exclude %{_libdir}/libTAO_XtResource.so*
+%exclude %{_suselibdir}/libTAO_XtResource.so*
 %endif
 
 %doc TAO/COPYING
@@ -2333,24 +2359,28 @@ fi
 %exclude %{_includedir}/tao/FlResource/FlResource_Loader.h
 %exclude %{_includedir}/tao/FlResource/TAO_FlResource_Export.h
 %exclude %{_libdir}/libTAO_FlResource.so
+%exclude %{_suselibdir}/libTAO_FlResource.so
 %endif
 %if %{?_with_qt:1}%{!?_with_qt:0}
 %exclude %{_includedir}/tao/QtResource/QtResource_Factory.h
 %exclude %{_includedir}/tao/QtResource/QtResource_Loader.h
 %exclude %{_includedir}/tao/QtResource/TAO_QtResource_Export.h
 %exclude %{_libdir}/libTAO_QtResource.so
+%exclude %{_suselibdir}/libTAO_QtResource.so
 %endif
 %if %{?_with_tk:1}%{!?_with_tk:0}
 %exclude %{_includedir}/tao/TkResource/TkResource_Factory.h
 %exclude %{_includedir}/tao/TkResource/TkResource_Loader.h
 %exclude %{_includedir}/tao/TkResource/TAO_TkResource_Export.h
 %exclude %{_libdir}/libTAO_TkResource.so
+%exclude %{_suselibdir}/libTAO_TkResource.so
 %endif
 %if %{?_with_xt:1}%{!?_with_xt:0}
 %exclude %{_includedir}/tao/XtResource/XtResource_Factory.h
 %exclude %{_includedir}/tao/XtResource/XtResource_Loader.h
 %exclude %{_includedir}/tao/XtResource/TAO_XtResource_Export.h
 %exclude %{_libdir}/libTAO_XtResource.so
+%exclude %{_suselibdir}/libTAO_XtResource.so
 %endif
 
 %doc TAO/COPYING
@@ -2547,7 +2577,7 @@ fi
 
 %files -n tao-flresource
 %defattr(-,root,root,-)
-%{_libdir}/libTAO_FlResource.so.%{TAOVERSO}
+%{_suselibdir}/libTAO_FlResource.so.%{TAOVERSO}
 
 %doc TAO/COPYING
 %doc TAO/PROBLEM-REPORT-FORM
@@ -2562,6 +2592,7 @@ fi
 
 %files -n tao-flresource-devel
 %defattr(-,root,root,-)
+%{_suselibdir}/libTAO_FlResource.so
 %{_libdir}/libTAO_FlResource.so
 %dir %{_includedir}/tao
 %{_includedir}/tao/FlResource/FlResource_Factory.h
@@ -2581,7 +2612,7 @@ fi
 
 %files -n tao-qtresource
 %defattr(-,root,root,-)
-%{_libdir}/libTAO_QtResource.so.%{TAOVERSO}
+%{_suselibdir}/libTAO_QtResource.so.%{TAOVERSO}
 
 %doc TAO/COPYING
 %doc TAO/PROBLEM-REPORT-FORM
@@ -2596,6 +2627,7 @@ fi
 
 %files -n tao-qtresource-devel
 %defattr(-,root,root,-)
+%{_suselibdir}/libTAO_QtResource.so
 %{_libdir}/libTAO_QtResource.so
 %dir %{_includedir}/tao
 %{_includedir}/tao/QtResource/QtResource_Factory.h
@@ -2615,7 +2647,7 @@ fi
 
 %files -n tao-tkresource
 %defattr(-,root,root,-)
-%{_libdir}/libTAO_TkResource.so.%{TAOVERSO}
+%{_suselibdir}/libTAO_TkResource.so.%{TAOVERSO}
 
 %doc TAO/COPYING
 %doc TAO/PROBLEM-REPORT-FORM
@@ -2631,6 +2663,7 @@ fi
 %files -n tao-tkresource-devel
 %defattr(-,root,root,-)
 %{_libdir}/libTAO_TkResource.so
+%{_suselibdir}/libTAO_TkResource.so
 %dir %{_includedir}/tao
 %{_includedir}/tao/TkResource/TkResource_Factory.h
 %{_includedir}/tao/TkResource/TkResource_Loader.h
@@ -2649,7 +2682,7 @@ fi
 
 %files -n tao-xtresource
 %defattr(-,root,root,-)
-%{_libdir}/libTAO_XtResource.so.%{TAOVERSO}
+%{_suselibdir}/libTAO_XtResource.so.%{TAOVERSO}
 
 %doc TAO/COPYING
 %doc TAO/PROBLEM-REPORT-FORM
@@ -2664,6 +2697,7 @@ fi
 
 %files -n tao-xtresource-devel
 %defattr(-,root,root,-)
+%{_suselibdir}/libTAO_XtResource.so
 %{_libdir}/libTAO_XtResource.so
 %dir %{_includedir}/tao
 %{_includedir}/tao/XtResource/XtResource_Factory.h
