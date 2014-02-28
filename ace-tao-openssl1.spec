@@ -232,7 +232,7 @@ Summary:        Header files and development components for ACE
 Version:        %{ACEVER}
 Group:          Development/Libraries/C and C++
 Requires:       ace%{_name_postfix} = %{ACEVER}
-Requires:       openssl-devel
+Requires:       libopenssl1-devel
 %if !0%{?suse_version}
 Provides:       perl(PerlACE::Run_Test) perl(Process) perl(VmsProcess) perl(Win32::Process)
 %endif
