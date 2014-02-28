@@ -1,0 +1,89 @@
+From 11b2f463bf83f5e12cee19eb158eed1a8930eb5e Mon Sep 17 00:00:00 2001
+From: "Dr. Stefan Schimanski" <stefan.schimanski@gmail.com>
+Date: Tue, 25 Feb 2014 13:21:35 +0100
+Subject: [PATCH 8/8] Clean up SSL server example
+
+---
+ ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp | 50 ++++++++++++++++-------------
+ 1 file changed, 28 insertions(+), 22 deletions(-)
+
+diff --git a/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp b/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp
+index 7a96853..e9c8318 100644
+--- a/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp
++++ b/ACE/examples/IPC_SAP/SSL_SAP/SSL-server.cpp
+@@ -413,44 +413,50 @@ run_event_loop (u_short port)
+   /* NOTREACHED */
+ }
+ 
++// proposed list from: https://community.qualys.com/blogs/securitylabs/2013/08/05/configuring-apache-nginx-and-openssl-for-forward-secrecy
++#define CIPHER_LIST1_WITH_RC4 "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS"
++#define CIPHER_LIST1_WITHOUT_RC4 "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4"
++#define CIPHER_LIST1_WITH_RC4_FOR_IE "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:+RC4:RC4"
++
++// proposed list from: https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
++#define CIPHER_LIST2 "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS"
++
++// proposed list from: http://vincent.bernat.im/en/blog/2011-ssl-perfect-forward-secrecy.html
++#define CIPHER_LIST3 "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-RC4-SHA:ECDHE-RSA-AES128-SHA:RC4:HIGH:!MD5:!aNULL:!EDH"
++
+ int
+ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
+ {
++  u_short port = ACE_DEFAULT_SERVER_PORT;
++  const char * elliptic_curve = "prime256v1";
++  const char * cipher_list = CIPHER_LIST1_WITH_RC4_FOR_IE;
++  if (argc > 1 && strlen(argv[1]))
++    port = ACE_OS::atoi (argv[1]);
++  if (argc > 2 && strlen(argv[2]))
++    elliptic_curve = argv[2];
++  if (argc > 3 && strlen(argv[3]))
++    cipher_list = argv[3];
++
+   ACE_SSL_Context *context = ACE_SSL_Context::instance ();
+ 
+   context->certificate ("./dummy.pem", SSL_FILETYPE_PEM);
+   context->private_key ("./key.pem", SSL_FILETYPE_PEM);
++  context->dh_params("dh-2048.pem", SSL_FILETYPE_PEM);
+ 
+-  if (context->set_ecdh_curve ("prime256v1") != 0) {
++  // setting elliptic curve for ECDH(E)
++  ACE_DEBUG((LM_DEBUG, "Setting elliptic curve for ECDH(E): %s\n", elliptic_curve));
++  if (context->set_ecdh_curve (elliptic_curve) != 0) {
+     ACE_ERROR ((LM_ERROR, "Could not set the ecdh curve\n"));
+   }
+ 
+-  if (context->dh_params("dh-2048.pem", SSL_FILETYPE_PEM) != 0) {
+-    ACE_ERROR ((LM_ERROR, "Could not load dh_params\n"));
+-  }
+-
+-  // proposed list from: https://community.qualys.com/blogs/securitylabs/2013/08/05/configuring-apache-nginx-and-openssl-for-forward-secrecy
+-  const char * cipher_list1_with_rc4 = "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS";
+-  const char * cipher_list1_without_rc4 = "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4";
+-  const char * cipher_list1_with_rc4_for_ie = "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:RC4:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:+RC4:RC4";
+-
+-  // proposed list from: https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
+-  const char * cipher_list2 = "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS";
+-
+-  // proposed list from: http://vincent.bernat.im/en/blog/2011-ssl-perfect-forward-secrecy.html
+-  const char * cipher_list3 = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-RC4-SHA:ECDHE-RSA-AES128-SHA:RC4:HIGH:!MD5:!aNULL:!EDH";
+-
+-  if (context->set_cipher_list (cipher_list1_with_rc4_for_ie) != 0) {
++  // setting cipher list
++  ACE_DEBUG((LM_DEBUG, "Setting cipher list: %s\n", cipher_list));
++  if (context->set_cipher_list (cipher_list) != 0) {
+     ACE_ERROR ((LM_ERROR, "Could not set the ciphers list\n"));
+   }
+   if (context->prefer_server_cipher_list(true) != 0) {
+     ACE_ERROR ((LM_ERROR, "Could not set option to prefer server ciphers list\n"));
+   }  
+ 
+-  u_short port = ACE_DEFAULT_SERVER_PORT;
+-
+-  if (argc > 1)
+-    port = ACE_OS::atoi (argv[1]);
+-
+   return run_event_loop (port);
+ }
+-- 
+1.7.12.4
+
